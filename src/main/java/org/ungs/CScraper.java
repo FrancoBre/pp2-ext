@@ -10,7 +10,7 @@ public class CScraper implements Scraper {
             return "[{\"name\":\"e\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":799.99,\"product_image_url\":\"https://example.com/\"}}]";
         }
 
-        throw new IllegalArgumentException();
+        return "[]";
     }
 
 }

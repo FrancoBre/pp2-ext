@@ -15,8 +15,13 @@ public class FScraper implements Scraper {
         if (productName.equals("b")) {
             return "[{\"name\":\"b\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":1299.99,\"product_image_url\":\"https://example.com/\"}}]";
         }
+        if (productName.equals("featured")) {
+            return "[{\"name\":\"i\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":799.99,\"product_image_url\":\"https://example.com/\"}},"
+                + "{\"name\":\"j\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":799.99,\"product_image_url\":\"https://example.com/\"}}]";
+        }
 
-        throw new IllegalArgumentException();
+        return "[{\"name\":\"a\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":799.99,\"product_image_url\":\"https://example.com/\"}},"
+            + "{\"name\":\"b\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":1299.99,\"product_image_url\":\"https://example.com/\"}}]";
     }
 
 }
