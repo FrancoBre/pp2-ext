@@ -17,8 +17,7 @@ public class MScraper implements Scraper {
                 + "{\"name\":\"j\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":799.99,\"product_image_url\":\"https://example.com/\"}}]";
         }
 
-        return "[{\"name\":\"a\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":799.99,\"product_image_url\":\"https://example.com/\"}},"
-            + "{\"name\":\"b\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":1299.99,\"product_image_url\":\"https://example.com/\"}}]";
+        return "[{\"name\":\"a\",\"post_url\":\"https://example.com/\",\"product_presentation\":{\"price\":799.99,\"product_image_url\":\"https://example.com/\"}}]";
 
     }
 
