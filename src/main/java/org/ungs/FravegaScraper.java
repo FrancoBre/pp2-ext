@@ -1,12 +1,10 @@
 package org.ungs;
 
-
 import shoppinator.core.interfaces.Scraper;
 
 public class FravegaScraper extends Scraper {
 
-    FravegaScraper(String url) {
-        super.setUrl(url);
+    public FravegaScraper() {
     }
 
     @Override
