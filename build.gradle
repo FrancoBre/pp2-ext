@@ -16,6 +16,11 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     implementation 'com.github.maxisandoval37:pp2-core:US4-price-range-SNAPSHOT'
+    implementation 'org.jsoup:jsoup:1.15.4'
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    implementation 'org.slf4j:slf4j-api:2.0.5'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.2'
 }
 
 test {
