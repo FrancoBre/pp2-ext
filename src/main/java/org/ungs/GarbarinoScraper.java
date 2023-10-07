@@ -1,6 +1,18 @@
 package org.ungs;
 
-import shoppinator.core.interfaces.Scraper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.jsoup.Connection;
@@ -8,35 +20,29 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.io.IOException;
-import java.text.Normalizer;
-import java.util.regex.Pattern;
-public class GScraper extends Scraper {
-    public GScraper() {}
+import shoppinator.core.interfaces.Scraper;
+
+public class GarbarinoScraper extends Scraper {
+
+    public GarbarinoScraper() {
+    }
+
     @Override
     public String scrap(String productName) {
-        //TODO obtener urls por properties
 
         if (productName.isEmpty()) {
             return "[]";
         }
 
-        String currentUrlSearch = "https://www.garbarino.com/shop/sort-by-price-low-to-high?search=" + productName.replace(" ", "%20");
+        String currentUrlSearch = this.getUrl() + productName.replace(" ", "%20");
 
         List<Callable<List<GenericElement>>> tasks = new ArrayList<>();
 
-        try{
+        try {
             List<GenericElement> genericElements = scrapeProductsFromPage(currentUrlSearch, productName);
             tasks.add(() -> genericElements);
+        } catch (Exception ignored) {
         }
-        catch (Exception ignored){}
 
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         List<Future<List<GenericElement>>> futures;
@@ -75,11 +81,9 @@ public class GScraper extends Scraper {
             for (Element articleElement : articleElements) {
                 String name = articleElement.select("div.product-card-design2-vertical__name").text();
                 String priceStr = articleElement.select("div.product-card-design2-vertical__price span").text()
-                        .replace("$", "")
-                        .replace(".", "")
-                        .replace(",", ".");
+                    .replace("$", "").replace(".", "").replace(",", ".");
 
-                if (!name.isEmpty() && !priceStr.isEmpty()){
+                if (!name.isEmpty() && !priceStr.isEmpty()) {
 
                     double price = Double.parseDouble(priceStr);
                     Element linkImg = articleElement.select("a").first();
@@ -121,6 +125,7 @@ public class GScraper extends Scraper {
 @Data
 @AllArgsConstructor
 class GenericElement {
+
     private String name;
     private String postUrl;
     private double price;
