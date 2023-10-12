@@ -2,58 +2,48 @@ package org.ungs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.List;
 import shoppinator.core.interfaces.Scraper;
 
 public class MockRefreshableScraper extends Scraper {
 
+    private List<GenericElement> elementList;
+    private int callCounter;
+
+    public MockRefreshableScraper() {
+        this.elementList = new ArrayList<>();
+        this.callCounter = 0;
+    }
+
+    @Override
     public String scrap(String productName) {
-        List<GenericElement> mockElementList = generateMockElementList();
-        return this.toJson(mockElementList);
+        callCounter++;
+        updateElementList();
+        return toJson();
     }
 
-    private List<GenericElement> generateMockElementList() {
-        List<GenericElement> genericElements = new java.util.ArrayList<>();
-        int randomSize = (int) (Math.random() * 10.0D);
-        int i = 0;
-
-        while (i < randomSize) {
-            GenericElement genericElement = new GenericElement();
-            genericElement.setName(this.generateRandomString());
-            genericElement.setPostUrl("https://example.com/");
-            genericElement.setPrice(this.generateRandomDouble());
-            genericElement.setProductImageUrl("https://example.com/");
-            genericElements.add(genericElement);
-            ++i;
+    private void updateElementList() {
+        elementList.clear();
+        if (callCounter % 2 == 0) {
+            elementList.add(new GenericElement("a", 10L));
+            elementList.add(new GenericElement("b", 100L));
+            elementList.add(new GenericElement("c", 1000L));
+            elementList.add(new GenericElement("d", 10000L));
+        } else {
+            elementList.add(new GenericElement("a", 10L));
+            elementList.add(new GenericElement("b", 100L));
+            elementList.add(new GenericElement("c", 1000L));
         }
-
-        return genericElements;
     }
 
-    private double generateRandomDouble() {
-        return Math.random() * 1000.0D;
-    }
-
-    private String generateRandomString() {
-        String randomString = "";
-        int randomSize = (int) (Math.random() * 10.0D);
-        int i = 0;
-
-        while (i < randomSize) {
-            randomString = randomString + (char) (int) (Math.random() * 26.0D + 97.0D);
-            ++i;
-        }
-
-        return randomString;
-    }
-
-    private String toJson(List<GenericElement> genericElements) {
+    private String toJson() {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            return objectMapper.writeValueAsString(genericElements);
-        } catch (JsonProcessingException var4) {
-            var4.printStackTrace();
+            return objectMapper.writeValueAsString(this.elementList);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
             return "";
         }
     }
@@ -62,23 +52,30 @@ public class MockRefreshableScraper extends Scraper {
 
         private String name;
         private String postUrl;
-        private double price;
+        private Long price;
         private String productImageUrl;
 
+        public GenericElement(String name, Long price) {
+            this.name = name;
+            this.postUrl = "https://www.example.com";
+            this.productImageUrl = "https://www.example.com";
+            this.price = price;
+        }
+
         public String getName() {
-            return this.name;
+            return name;
         }
 
         public String getPostUrl() {
-            return this.postUrl;
+            return postUrl;
         }
 
-        public double getPrice() {
-            return this.price;
+        public Long getPrice() {
+            return price;
         }
 
         public String getProductImageUrl() {
-            return this.productImageUrl;
+            return productImageUrl;
         }
 
         public void setName(String name) {
@@ -89,7 +86,7 @@ public class MockRefreshableScraper extends Scraper {
             this.postUrl = postUrl;
         }
 
-        public void setPrice(double price) {
+        public void setPrice(Long price) {
             this.price = price;
         }
 
