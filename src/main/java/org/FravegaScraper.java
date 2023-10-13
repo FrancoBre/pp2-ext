@@ -34,7 +34,7 @@ public class FravegaScraper extends Scraper {
             return "[]";
         }
 
-        String currentUrlSearch = "https://www.fravega.com/l/?keyword=" + productName.replace(" ","+") +
+        String currentUrlSearch = this.getUrl()+"/l/?keyword=" + productName.replace(" ","+") +
                 "&sorting=LOWEST_SALE_PRICE&page=";
         List<Callable<List<GenericElementFravega>>> tasks = new ArrayList<>();
 
@@ -91,7 +91,7 @@ public class FravegaScraper extends Scraper {
                         .replace(",", ".");
                 double price = Double.parseDouble(priceStr);
                 Element link = articleElement.select("a").first();
-                String postUrl = link != null ? "https://fravega.com" + link.attr("href") : "";
+                String postUrl = link != null ? this.getUrl() + link.attr("href") : "";
                 String imageUrl = articleElement.select("img[src]").attr("src");
 
                 if (normalizeString(name).contains(normalizeString(productName))) {

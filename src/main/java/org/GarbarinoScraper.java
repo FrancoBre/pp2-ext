@@ -34,7 +34,7 @@ public class GarbarinoScraper extends Scraper {
             return "[]";
         }
 
-        String currentUrlSearch = this.getUrl() + productName.replace(" ", "%20");
+        String currentUrlSearch = this.getUrl() +"/shop/sort-by-price-low-to-high?search="+ productName.replace(" ", "%20");
         List<Callable<List<GenericElementGarbarino>>> tasks = new ArrayList<>();
 
         try {
@@ -85,7 +85,7 @@ public class GarbarinoScraper extends Scraper {
 
                     double price = Double.parseDouble(priceStr);
                     Element linkImg = articleElement.select("a").first();
-                    String postUrl = (linkImg != null) ? ("https://www.garbarino.com" + linkImg.attr("href")) : "";
+                    String postUrl = (linkImg != null) ? (this.getUrl() + linkImg.attr("href")) : "";
                     String imageUrl = articleElement.select("img[src]").attr("src");
 
                     if (normalizeString(name).contains(normalizeString(productName)) && !imageUrl.isEmpty()) {
