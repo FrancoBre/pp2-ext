@@ -2,6 +2,7 @@ package org.ungs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import entities.Scraper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.jsoup.Connection;
@@ -9,7 +10,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import shoppinator.core.interfaces.Scraper;
 import java.io.IOException;
 import java.text.Normalizer;
 import java.util.ArrayList;
