@@ -9,7 +9,10 @@ import java.util.Set;
 
 public class FShop extends Shop {
 
-    final String name = "F";
+    public FShop() {
+        super();
+        this.name = "F";
+    }
 
     @Override
     public Set<Product> search(String productName) {
@@ -17,7 +20,9 @@ public class FShop extends Shop {
             return Collections.emptySet();
         }
 
-        return this.getProducts(productName);
+        Set<Product> products = this.getProducts(productName);
+        this.notifySearchResult(products);
+        return products;
     }
 
     private Set<Product> getProducts(String productName) {
