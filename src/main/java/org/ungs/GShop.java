@@ -17,6 +17,7 @@ public class GShop extends Shop {
     @Override
     public Set<Product> search(String productName) {
         if (productName.isEmpty() || productName.equals("e")) {
+            this.notifySearchResult(Collections.emptySet());
             return Collections.emptySet();
         }
 
