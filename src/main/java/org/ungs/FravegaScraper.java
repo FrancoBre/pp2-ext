@@ -1,59 +1,57 @@
 package org.ungs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import entities.Scraper;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import entities.Product;
 import java.io.IOException;
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
+import entities.ProductPresentation;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import entities.Shop;
 
-public class FravegaScraper extends Scraper {
+public class FravegaScraper extends Shop {
+
+    String shopUrl = "www.fravega.com";
 
     public FravegaScraper() {
     }
 
     @Override
-    public String scrap(String productName) {
+    public Set<Product> search(String productName) {
 
         if (productName.isEmpty()) {
-            return "[]";
+            return new HashSet<>();
         }
 
-        String currentUrlSearch = this.getUrl()+"/l/?keyword=" + productName.replace(" ","+") +
+        String currentUrlSearch = shopUrl+"/l/?keyword=" + productName.replace(" ","+") +
                 "&sorting=LOWEST_SALE_PRICE&page=";
-        List<Callable<List<GenericElementFravega>>> tasks = new ArrayList<>();
+        Set<Callable<Set<Product>>> tasks = new HashSet<>();
 
         int pageNum = 1;
         boolean productsExists = true;
 
         while(productsExists) {//Recorremos cada una de las paginas de la tienda
             String urlIt = (currentUrlSearch + pageNum);
-            List<GenericElementFravega> elements = scrapeProductsFromPage(urlIt, productName);
+            Set<Product> products = scrapeProductsFromPage(urlIt, productName);
             pageNum++;
-            productsExists = !elements.isEmpty();//Si llego al final de las paginas, salimos
-            tasks.add(() -> elements);
+            productsExists = !products.isEmpty();//Si llego al final de las paginas, salimos
+            tasks.add(() -> products);
         }
 
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        List<Future<List<GenericElementFravega>>> futures;
+        Set<Future<Set<Product>>> futures;
 
         try {
-            futures = executorService.invokeAll(tasks);
+            futures = new HashSet<>(executorService.invokeAll(tasks));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;
@@ -61,21 +59,21 @@ public class FravegaScraper extends Scraper {
             executorService.shutdown();
         }
 
-        List<GenericElementFravega> genericElementsList = new ArrayList<>();
-        for (Future<List<GenericElementFravega>> future : futures) {
+        Set<Product> productsList = new HashSet<>();
+        for (Future<Set<Product>> future : futures) {
             try {
-                genericElementsList.addAll(future.get());
+                productsList.addAll(future.get());
             } catch (Exception e) {
                 Thread.currentThread().interrupt();
                 e.printStackTrace();
             }
         }
 
-        return generateJson(genericElementsList);
+        return productsList;
     }
 
-    private List<GenericElementFravega> scrapeProductsFromPage(String urlSearch, String productName) {
-        Map<String, GenericElementFravega> genericElementsMap = new LinkedHashMap<>();//LinkedHashMap para mantener el orden y que no haya repes
+    private Set<Product>  scrapeProductsFromPage(String urlSearch, String productName) {
+        Set<Product> products = new HashSet<>();
 
         try {
             Connection connection = Jsoup.connect(urlSearch);
@@ -89,21 +87,21 @@ public class FravegaScraper extends Scraper {
                         .replace("$", "")
                         .replace(".", "")
                         .replace(",", ".");
-                double price = Double.parseDouble(priceStr);
+                Long price = Long.parseLong(priceStr);
                 Element link = articleElement.select("a").first();
-                String postUrl = link != null ? this.getUrl() + link.attr("href") : "";
+                String postUrl = link != null ? shopUrl + link.attr("href") : "";
                 String imageUrl = articleElement.select("img[src]").attr("src");
 
                 if (normalizeString(name).contains(normalizeString(productName))) {
-                    GenericElementFravega genericElement = new GenericElementFravega(name, postUrl, price, imageUrl);
-                    genericElementsMap.put(name, genericElement);
+                    Product product = new Product(name, this.getName(), new ProductPresentation(price, postUrl, imageUrl));
+                    products.add(product);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new ArrayList<>(genericElementsMap.values());
+        return products;
     }
 
     private String normalizeString(String input) {
@@ -111,24 +109,4 @@ public class FravegaScraper extends Scraper {
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         return pattern.matcher(normalized).replaceAll("").toLowerCase();
     }
-
-    public String generateJson(List<GenericElementFravega> genericElements) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        try {
-            return objectMapper.writeValueAsString(genericElements);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-}
-
-@Data
-@AllArgsConstructor
-class GenericElementFravega {
-    private String name;
-    private String postUrl;
-    private double price;
-    private String productImageUrl;
 }
