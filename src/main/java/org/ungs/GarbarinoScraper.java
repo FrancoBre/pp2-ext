@@ -1,74 +1,73 @@
 package org.ungs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import entities.Scraper;
+import entities.Product;
 import java.io.IOException;
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+
+import entities.ProductPresentation;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import entities.Shop;
 
-public class GarbarinoScraper extends Scraper {
+public class GarbarinoScraper extends Shop {
 
+    String shopUrl = "www.garbarino.com";
     public GarbarinoScraper() {
     }
 
     @Override
-    public String scrap(String productName) {
+    public Set<Product> search(String productName) {
 
         if (productName.isEmpty()) {
-            return "[]";
+            return new HashSet<>();
         }
 
-        String currentUrlSearch = this.getUrl() +"/shop/sort-by-price-low-to-high?search="+ productName.replace(" ", "%20");
-        List<Callable<List<GenericElementGarbarino>>> tasks = new ArrayList<>();
+        String currentUrlSearch = shopUrl + "/shop/sort-by-price-low-to-high?search=" + productName.replace(" ", "%20");
+        Set<Callable<Set<Product>>> tasks = new HashSet<>();
 
         try {
-            List<GenericElementGarbarino> genericElements = scrapeProductsFromPage(currentUrlSearch, productName);
-            tasks.add(() -> genericElements);
-        } catch (Exception ignored) {}
+            Set<Product> products = scrapeProductsFromPage(currentUrlSearch, productName);
+            tasks.add(() -> products);
+        } catch (Exception ignored) {
+        }
 
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        List<Future<List<GenericElementGarbarino>>> futures;
+        Set<Future<Set<Product>>> futures;
 
         try {
-            futures = executorService.invokeAll(tasks);
+            futures = new HashSet<>(executorService.invokeAll(tasks));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return null;
+            return new HashSet<>();
         } finally {
             executorService.shutdown();
         }
 
-        List<GenericElementGarbarino> genericElementsList = new ArrayList<>();
-        for (Future<List<GenericElementGarbarino>> future : futures) {
+        Set<Product> products = new HashSet<>();
+        for (Future<Set<Product>> future : futures) {
             try {
-                genericElementsList.addAll(future.get());
+                products.addAll(future.get());
             } catch (Exception e) {
                 Thread.currentThread().interrupt();
                 e.printStackTrace();
             }
         }
 
-        return generateJson(genericElementsList);
+        return products;
     }
 
-    private List<GenericElementGarbarino> scrapeProductsFromPage(String urlSearch, String productName) {
-        Map<String, GenericElementGarbarino> genericElementsMap = new LinkedHashMap<>();//LinkedHashMap para mantener el orden y que no haya repes
+    private Set<Product> scrapeProductsFromPage(String urlSearch, String productName) {
+        Set<Product> products = new HashSet<>();
 
         try {
             Connection connection = Jsoup.connect(urlSearch);
@@ -79,27 +78,25 @@ public class GarbarinoScraper extends Scraper {
             for (Element articleElement : articleElements) {
                 String name = articleElement.select("div.product-card-design6-vertical__name").text();
                 String priceStr = articleElement.select("div.product-card-design6-vertical__price span").text()
-                    .replace("$", "").replace(".", "").replace(",", ".");
+                        .replace("$", "").replace(".", "").replace(",", ".");
 
                 if (!name.isEmpty() && !priceStr.isEmpty()) {
-
-                    double price = Double.parseDouble(priceStr);
+                    Long price = Long.parseLong(priceStr);
                     Element linkImg = articleElement.select("a").first();
-                    String postUrl = (linkImg != null) ? (this.getUrl() + linkImg.attr("href")) : "";
+                    String postUrl = (linkImg != null) ? (shopUrl + linkImg.attr("href")) : "";
                     String imageUrl = articleElement.select("img[src]").attr("src");
 
                     if (normalizeString(name).contains(normalizeString(productName)) && !imageUrl.isEmpty()) {
-                        GenericElementGarbarino genericElement = new GenericElementGarbarino(name, postUrl, price, imageUrl);
-                        genericElementsMap.put(name, genericElement);
+                        Product product = new Product(name, this.getName(), new ProductPresentation(price, postUrl, imageUrl));
+                        products.add(product);
                     }
                 }
-
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new ArrayList<>(genericElementsMap.values());
+        return products;
     }
 
     private String normalizeString(String input) {
@@ -107,25 +104,4 @@ public class GarbarinoScraper extends Scraper {
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         return pattern.matcher(normalized).replaceAll("").toLowerCase();
     }
-
-    public String generateJson(List<GenericElementGarbarino> genericElements) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        try {
-            return objectMapper.writeValueAsString(genericElements);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-}
-
-@Data
-@AllArgsConstructor
-class GenericElementGarbarino {
-
-    private String name;
-    private String postUrl;
-    private double price;
-    private String productImageUrl;
 }
