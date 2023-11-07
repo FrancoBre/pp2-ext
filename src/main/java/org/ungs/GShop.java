@@ -29,10 +29,12 @@ public class GShop extends Shop {
     private Set<Product> getProducts(String productName) {
         Set<Product> products = new HashSet<>();
 
-        ProductPresentation productPresentation = new ProductPresentation(200L, "https://example.com/",
-            "https://example.com/");
-        Product product = new Product(productName, this.name, productPresentation);
-        products.add(product);
+        for (int i = 0; i < 2; i++) {
+            ProductPresentation productPresentation = new ProductPresentation(200L, "https://example.com/",
+                "https://example.com/");
+            Product product = new Product(productName, this.name, productPresentation);
+            products.add(product);
+        }
 
         return products;
     }
