@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
-
 import entities.ProductPresentation;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -21,7 +20,7 @@ import entities.Shop;
 
 public class GarbarinoScraper extends Shop {
 
-    String shopUrl = "www.garbarino.com";
+    String shopUrl = "https://www.garbarino.com";
     public GarbarinoScraper() {
     }
 
@@ -78,7 +77,10 @@ public class GarbarinoScraper extends Shop {
             for (Element articleElement : articleElements) {
                 String name = articleElement.select("div.product-card-design6-vertical__name").text();
                 String priceStr = articleElement.select("div.product-card-design6-vertical__price span").text()
-                        .replace("$", "").replace(".", "").replace(",", ".");
+                        .replace("$", "")
+                        .replace(".", "")
+                        .replace(",", ".")
+                        .replace(" ", "");
 
                 if (!name.isEmpty() && !priceStr.isEmpty()) {
                     Long price = Long.parseLong(priceStr);
