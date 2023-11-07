@@ -88,7 +88,7 @@ public class GarbarinoScraper extends Shop {
                 if (!name.isEmpty() && !priceStr.isEmpty()) {
                     Long price = Long.parseLong(priceStr);
                     Element linkImg = articleElement.select("a").first();
-                    String postUrl = (linkImg != null) ? (shopUrl + linkImg.attr("href")) : "";
+                    String postUrl = (linkImg != null) ? ("https://www.garbarino.com" + linkImg.attr("href")) : "";
                     String imageUrl = articleElement.select("img[src]").attr("src");
 
                     if (normalizeString(name).contains(normalizeString(productName)) && !imageUrl.isEmpty()) {

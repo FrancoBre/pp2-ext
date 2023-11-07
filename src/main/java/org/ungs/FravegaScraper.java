@@ -103,7 +103,7 @@ public class FravegaScraper extends Shop {
                 Long price = Long.parseLong(priceWithoutDecimals[0]);
 
                 Element link = articleElement.select("a").first();
-                String postUrl = link != null ? shopUrl + link.attr("href") : "";
+                String postUrl = link != null ? "https://www.fravega.com" + link.attr("href") : "";
                 String imageUrl = articleElement.select("img[src]").attr("src");
 
                 if (normalizeString(name).contains(normalizeString(productName))) {
