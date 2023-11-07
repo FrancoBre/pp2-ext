@@ -1,6 +1,8 @@
 package org.ungs;
 
 import entities.Product;
+
+import java.io.File;
 import java.io.IOException;
 import java.text.Normalizer;
 import java.util.HashSet;
@@ -69,9 +71,7 @@ public class GarbarinoScraper extends Shop {
         Set<Product> products = new HashSet<>();
 
         try {
-            Connection connection = Jsoup.connect(urlSearch);
-            connection.header("Content-Type", "text/html; charset=UTF-8");
-            Document documentHtml = connection.get();
+            Document documentHtml = getDocumentPdr(urlSearch);
             Elements articleElements = documentHtml.select(".product-card-design6-vertical");
 
             for (Element articleElement : articleElements) {
@@ -105,5 +105,17 @@ public class GarbarinoScraper extends Shop {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         return pattern.matcher(normalized).replaceAll("").toLowerCase();
+    }
+
+    private Document getDocumentPdr(String urlSearch) throws IOException {
+        Connection connection = Jsoup.connect(urlSearch);
+        connection.header("Content-Type", "text/html; charset=UTF-8");
+        return connection.get();
+    }
+
+    private Document getDocumentMock() throws IOException {
+        String filePath = "src/resources/garbarino-mouse.html";
+        File input = new File(filePath);
+        return Jsoup.parse(input, "UTF-8", "");
     }
 }
