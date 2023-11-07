@@ -22,9 +22,9 @@ import entities.Shop;
 public class FravegaScraper extends Shop {
 
     String shopUrl = "https://www.fravega.com";
+    //String shopUrl = "src/resources/fravega-mouse.html";
 
-    public FravegaScraper() {
-    }
+    public FravegaScraper() {}
 
     @Override
     public Set<Product> search(String productName) {
@@ -33,15 +33,26 @@ public class FravegaScraper extends Shop {
             return new HashSet<>();
         }
 
-        String currentUrlSearch = shopUrl+"/l/?keyword=" + productName.replace(" ","+") +
-                "&sorting=LOWEST_SALE_PRICE&page=";
+        String currentUrlSearch = shopUrl;
+
+        if (shopUrl.contains("www.")){
+            currentUrlSearch = shopUrl+"/l/?keyword=" + productName.replace(" ","+")+"&sorting=LOWEST_SALE_PRICE&page=";
+        }
+
         Set<Callable<Set<Product>>> tasks = new HashSet<>();
 
         int pageNum = 1;
         boolean productsExists = true;
+        boolean productsHtmlIsOffline = false;
 
-        while(productsExists) {//Recorremos cada una de las paginas de la tienda
+        while(productsExists && !productsHtmlIsOffline) {//Recorremos cada una de las paginas de la tienda
             String urlIt = (currentUrlSearch + pageNum);
+
+            if (!currentUrlSearch.contains("www.")){
+                urlIt = currentUrlSearch;
+                productsHtmlIsOffline = true;
+            }
+
             Set<Product> products = scrapeProductsFromPage(urlIt, productName);
             pageNum++;
             productsExists = !products.isEmpty();//Si llego al final de las paginas, salimos
@@ -77,7 +88,7 @@ public class FravegaScraper extends Shop {
         Set<Product> products = new HashSet<>();
 
         try {
-            Document documentHtml = getDocumentPdr(urlSearch);
+            Document documentHtml = getDocumentHtml(urlSearch);
             Elements articleElements = documentHtml.select("article.sc-ef269aa1-2.FmCUT");
 
             for (Element articleElement : articleElements) {
@@ -113,15 +124,14 @@ public class FravegaScraper extends Shop {
         return pattern.matcher(normalized).replaceAll("").toLowerCase();
     }
 
-    private Document getDocumentPdr(String urlSearch) throws IOException {
-        Connection connection = Jsoup.connect(urlSearch);
-        connection.header("Content-Type", "text/html; charset=UTF-8");
-        return connection.get();
-    }
+    private Document getDocumentHtml(String shopUrl) throws IOException {
+        if (shopUrl.contains("www.")){
+            Connection connection = Jsoup.connect(shopUrl);
+            connection.header("Content-Type", "text/html; charset=UTF-8");
+            return connection.get();
+        }
 
-    private Document getDocumentMock() throws IOException {
-        String filePath = "src/resources/fravega-mouse.html";
-        File input = new File(filePath);
+        File input = new File(shopUrl);
         return Jsoup.parse(input, "UTF-8", "");
     }
 }
