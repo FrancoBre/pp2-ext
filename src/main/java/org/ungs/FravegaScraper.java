@@ -1,6 +1,7 @@
 package org.ungs;
 
 import entities.Product;
+import java.io.File;
 import java.io.IOException;
 import java.text.Normalizer;
 import java.util.HashSet;
@@ -20,7 +21,7 @@ import entities.Shop;
 
 public class FravegaScraper extends Shop {
 
-    String shopUrl = "www.fravega.com";
+    String shopUrl = "https://www.fravega.com";
 
     public FravegaScraper() {
     }
@@ -76,18 +77,20 @@ public class FravegaScraper extends Shop {
         Set<Product> products = new HashSet<>();
 
         try {
-            Connection connection = Jsoup.connect(urlSearch);
-            connection.header("Content-Type", "text/html; charset=UTF-8");
-            Document documentHtml = connection.get();
+            Document documentHtml = getDocumentPdr(urlSearch);
             Elements articleElements = documentHtml.select("article.sc-ef269aa1-2.FmCUT");
 
             for (Element articleElement : articleElements) {
                 String name = articleElement.select("span.sc-6321a7c8-0.jKvHol").text();
+
                 String priceStr = articleElement.select("div.sc-854e1b3a-0.kfAWhD span.sc-ad64037f-0.ixxpWu").text()
                         .replace("$", "")
                         .replace(".", "")
                         .replace(",", ".");
-                Long price = Long.parseLong(priceStr);
+
+                String priceWithoutDecimals[] = priceStr.split("\\.");//supr decimales
+                Long price = Long.parseLong(priceWithoutDecimals[0]);
+
                 Element link = articleElement.select("a").first();
                 String postUrl = link != null ? shopUrl + link.attr("href") : "";
                 String imageUrl = articleElement.select("img[src]").attr("src");
@@ -108,5 +111,17 @@ public class FravegaScraper extends Shop {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         return pattern.matcher(normalized).replaceAll("").toLowerCase();
+    }
+
+    private Document getDocumentPdr(String urlSearch) throws IOException {
+        Connection connection = Jsoup.connect(urlSearch);
+        connection.header("Content-Type", "text/html; charset=UTF-8");
+        return connection.get();
+    }
+
+    private Document getDocumentMock() throws IOException {
+        String filePath = "src/resources/fravega-mouse.html";
+        File input = new File(filePath);
+        return Jsoup.parse(input, "UTF-8", "");
     }
 }
