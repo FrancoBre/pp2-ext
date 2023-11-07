@@ -1,7 +1,6 @@
 package org.ungs;
 
 import entities.Product;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.Normalizer;
@@ -22,9 +21,9 @@ import entities.Shop;
 
 public class GarbarinoScraper extends Shop {
 
+    //String shopUrl = "src/resources/garbarino-mouse.html";
     String shopUrl = "https://www.garbarino.com";
-    public GarbarinoScraper() {
-    }
+    public GarbarinoScraper() {}
 
     @Override
     public Set<Product> search(String productName) {
@@ -33,14 +32,18 @@ public class GarbarinoScraper extends Shop {
             return new HashSet<>();
         }
 
-        String currentUrlSearch = shopUrl + "/shop/sort-by-price-low-to-high?search=" + productName.replace(" ", "%20");
+        String currentUrlSearch = shopUrl;
+
+        if (shopUrl.contains("www.")){
+            currentUrlSearch = shopUrl + "/shop/sort-by-price-low-to-high?search=" + productName.replace(" ", "%20");
+        }
+
         Set<Callable<Set<Product>>> tasks = new HashSet<>();
 
         try {
             Set<Product> products = scrapeProductsFromPage(currentUrlSearch, productName);
             tasks.add(() -> products);
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         Set<Future<Set<Product>>> futures;
@@ -71,7 +74,7 @@ public class GarbarinoScraper extends Shop {
         Set<Product> products = new HashSet<>();
 
         try {
-            Document documentHtml = getDocumentPdr(urlSearch);
+            Document documentHtml = getDocumentHtml(urlSearch);
             Elements articleElements = documentHtml.select(".product-card-design6-vertical");
 
             for (Element articleElement : articleElements) {
@@ -107,15 +110,14 @@ public class GarbarinoScraper extends Shop {
         return pattern.matcher(normalized).replaceAll("").toLowerCase();
     }
 
-    private Document getDocumentPdr(String urlSearch) throws IOException {
-        Connection connection = Jsoup.connect(urlSearch);
-        connection.header("Content-Type", "text/html; charset=UTF-8");
-        return connection.get();
-    }
+    private Document getDocumentHtml(String shopUrl) throws IOException {
+        if (shopUrl.contains("www.")){
+            Connection connection = Jsoup.connect(shopUrl);
+            connection.header("Content-Type", "text/html; charset=UTF-8");
+            return connection.get();
+        }
 
-    private Document getDocumentMock() throws IOException {
-        String filePath = "src/resources/garbarino-mouse.html";
-        File input = new File(filePath);
+        File input = new File(shopUrl);
         return Jsoup.parse(input, "UTF-8", "");
     }
 }
