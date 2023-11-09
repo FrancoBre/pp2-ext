@@ -1,8 +1,7 @@
 package org.ungs;
 
-import entities.Product;
-import entities.ProductPresentation;
 import entities.Shop;
+import java.math.BigDecimal;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,7 +10,9 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,13 +29,13 @@ public class RefreshableShop extends Shop {
     }
 
     @Override
-    public Set<Product> search(String productName) {
+    public Set<Map<String, BigDecimal>> search(String productName) {
         if (productName.isEmpty() || productName.equals("e")) {
             this.notifySearchResult(Collections.emptySet());
             return Collections.emptySet();
         }
 
-        Set<Product> products = addProducts(productName);
+        Set<Map<String, BigDecimal>> products = addProducts(productName);
         this.notifySearchResult(products);
 
         try {
@@ -45,15 +46,12 @@ public class RefreshableShop extends Shop {
         return products;
     }
 
-    private Set<Product> addProducts(String productName) {
-        Set<Product> products = new HashSet<>();
-
-        ProductPresentation productPresentation = new ProductPresentation(initialPrice, "https://example.com/",
-            "https://example.com/");
-        Product product = new Product(productName, this.name, productPresentation);
+    private Set<Map<String, BigDecimal>> addProducts(String productName) {
+        Set<Map<String, BigDecimal>> products = new HashSet<>();
+        Map<String, BigDecimal> product = new HashMap<>();
+        product.put(productName, new BigDecimal(initialPrice += 100L));
         products.add(product);
 
-        initialPrice += 100L;
         this.notifySearchResult(products);
         return products;
     }

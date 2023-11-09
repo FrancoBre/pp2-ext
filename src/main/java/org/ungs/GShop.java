@@ -1,10 +1,11 @@
 package org.ungs;
 
-import entities.Product;
-import entities.ProductPresentation;
 import entities.Shop;
+import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class GShop extends Shop {
@@ -15,26 +16,22 @@ public class GShop extends Shop {
     }
 
     @Override
-    public Set<Product> search(String productName) {
+    public Set<Map<String, BigDecimal>> search(String productName) {
         if (productName.isEmpty() || productName.equals("e")) {
             this.notifySearchResult(Collections.emptySet());
             return Collections.emptySet();
         }
 
-        Set<Product> products = this.getProducts(productName);
+        Set<Map<String, BigDecimal>> products = this.getProducts(productName);
         this.notifySearchResult(products);
         return products;
     }
 
-    private Set<Product> getProducts(String productName) {
-        Set<Product> products = new HashSet<>();
-
-        for (int i = 0; i < 2; i++) {
-            ProductPresentation productPresentation = new ProductPresentation(200L, "https://example.com/",
-                "https://example.com/");
-            Product product = new Product(productName, this.name, productPresentation);
-            products.add(product);
-        }
+    private Set<Map<String, BigDecimal>> getProducts(String productName) {
+        Set<Map<String, BigDecimal>> products = new HashSet<>();
+        Map<String, BigDecimal> product = new HashMap<>();
+        product.put(productName, new BigDecimal(200));
+        products.add(product);
 
         return products;
     }
