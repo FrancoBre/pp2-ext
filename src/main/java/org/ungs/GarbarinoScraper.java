@@ -21,8 +21,8 @@ import entities.Shop;
 
 public class GarbarinoScraper extends Shop {
 
-    //String shopUrl = "src/resources/garbarino-mouse.html";
-    String shopUrl = "https://www.garbarino.com";
+    String shopUrl = "src/resources/garbarino-mouse.html";
+    //String shopUrl = "https://www.garbarino.com";
     public GarbarinoScraper() {}
 
     @Override
