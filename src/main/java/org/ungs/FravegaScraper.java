@@ -21,8 +21,8 @@ import entities.Shop;
 
 public class FravegaScraper extends Shop {
 
-    String shopUrl = "https://www.fravega.com";
-    //String shopUrl = "src/resources/fravega-mouse.html";
+    //String shopUrl = "https://www.fravega.com";
+    String shopUrl = "src/resources/fravega-mouse.html";
 
     public FravegaScraper() {}
 
