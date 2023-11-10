@@ -1,23 +1,24 @@
 package org.ungs;
 
-import entities.Product;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.Normalizer;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
-import entities.ProductPresentation;
+import entities.Shop;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import entities.Shop;
 
 public class GarbarinoScraper extends Shop {
 
@@ -26,27 +27,26 @@ public class GarbarinoScraper extends Shop {
     public GarbarinoScraper() {}
 
     @Override
-    public Set<Product> search(String productName) {
-
+    public Set<Map<String, BigDecimal>> search(String productName) {
         if (productName.isEmpty()) {
             return new HashSet<>();
         }
 
         String currentUrlSearch = shopUrl;
 
-        if (shopUrl.contains("www.")){
+        if (shopUrl.contains("www.")) {
             currentUrlSearch = shopUrl + "/shop/sort-by-price-low-to-high?search=" + productName.replace(" ", "%20");
         }
 
-        Set<Callable<Set<Product>>> tasks = new HashSet<>();
+        Set<Callable<Set<Map<String, BigDecimal>>>> tasks = new HashSet<>();
 
         try {
-            Set<Product> products = scrapeProductsFromPage(currentUrlSearch, productName);
-            tasks.add(() -> products);
+            Set<Map<String, BigDecimal>> articles = scrapeProductsFromPage(currentUrlSearch, productName);
+            tasks.add(() -> articles);
         } catch (Exception ignored) {}
 
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        Set<Future<Set<Product>>> futures;
+        Set<Future<Set<Map<String, BigDecimal>>>> futures;
 
         try {
             futures = new HashSet<>(executorService.invokeAll(tasks));
@@ -57,21 +57,20 @@ public class GarbarinoScraper extends Shop {
             executorService.shutdown();
         }
 
-        Set<Product> products = new HashSet<>();
-        for (Future<Set<Product>> future : futures) {
+        Set<Map<String, BigDecimal>> result = new HashSet<>();
+        for (Future<Set<Map<String, BigDecimal>>> future : futures) {
             try {
-                products.addAll(future.get());
+                result.addAll(future.get());
             } catch (Exception e) {
                 Thread.currentThread().interrupt();
-                e.printStackTrace();
             }
         }
 
-        return products;
+        return result;
     }
 
-    private Set<Product> scrapeProductsFromPage(String urlSearch, String productName) {
-        Set<Product> products = new HashSet<>();
+    private Set<Map<String, BigDecimal>> scrapeProductsFromPage(String urlSearch, String productName) {
+        Set<Map<String, BigDecimal>> elements = new HashSet<>();
 
         try {
             Document documentHtml = getDocumentHtml(urlSearch);
@@ -86,14 +85,14 @@ public class GarbarinoScraper extends Shop {
                         .replace(" ", "");
 
                 if (!name.isEmpty() && !priceStr.isEmpty()) {
-                    Long price = Long.parseLong(priceStr);
-                    Element linkImg = articleElement.select("a").first();
-                    String postUrl = (linkImg != null) ? ("https://www.garbarino.com" + linkImg.attr("href")) : "";
-                    String imageUrl = articleElement.select("img[src]").attr("src");
+                    double price = Double.parseDouble(priceStr);
+                    BigDecimal priceBd = new BigDecimal(Double.toString(price));
 
-                    if (normalizeString(name).contains(normalizeString(productName)) && !imageUrl.isEmpty()) {
-                        Product product = new Product(name, this.getName(), new ProductPresentation(price, postUrl, imageUrl));
-                        products.add(product);
+                    if (normalizeString(name).contains(normalizeString(productName))) {
+                        Map<String, BigDecimal> articleMap = new HashMap<>();
+                        articleMap.put(name, priceBd);
+
+                        elements.add(articleMap);
                     }
                 }
             }
@@ -101,7 +100,7 @@ public class GarbarinoScraper extends Shop {
             e.printStackTrace();
         }
 
-        return products;
+        return elements;
     }
 
     private String normalizeString(String input) {
