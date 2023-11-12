@@ -22,8 +22,8 @@ import org.jsoup.select.Elements;
 
 public class FravegaScraper extends Shop {
 
-    //String shopUrl = "https://www.fravega.com";
-    String shopUrl = "src/resources/fravega-mouse-teclado-webcam.html";
+    String shopUrl = "https://www.fravega.com";
+    //String shopUrl = "src/resources/fravega-mouse-teclado-webcam.html";
 
     public FravegaScraper() {}
 
@@ -35,7 +35,7 @@ public class FravegaScraper extends Shop {
 
         String currentUrlSearch = shopUrl;
 
-        if (shopUrl.contains("www.")) {
+        if (isValidWebUrl(shopUrl)) {
             currentUrlSearch = shopUrl + "/l/?keyword=" + productName.replace(" ", "+") + "&sorting=LOWEST_SALE_PRICE&page=";
         }
 
@@ -48,7 +48,7 @@ public class FravegaScraper extends Shop {
         while (productsExists && !productsHtmlIsOffline) {
             String urlIt = (currentUrlSearch + pageNum);
 
-            if (!currentUrlSearch.contains("www.")) {
+            if (!isValidWebUrl(currentUrlSearch)) {
                 urlIt = currentUrlSearch;
                 productsHtmlIsOffline = true;
             }
@@ -123,7 +123,7 @@ public class FravegaScraper extends Shop {
     }
 
     private Document getDocumentHtml(String shopUrl) throws IOException {
-        if (shopUrl.contains("www.")){
+        if (isValidWebUrl(shopUrl)){
             Connection connection = Jsoup.connect(shopUrl);
             connection.header("Content-Type", "text/html; charset=UTF-8");
             return connection.get();
@@ -131,5 +131,9 @@ public class FravegaScraper extends Shop {
 
         File input = new File(shopUrl);
         return Jsoup.parse(input, "UTF-8", "");
+    }
+
+    private boolean isValidWebUrl(String url){
+        return url.contains("www.") || url.contains("http");
     }
 }
