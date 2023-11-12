@@ -34,7 +34,7 @@ public class GarbarinoScraper extends Shop {
 
         String currentUrlSearch = shopUrl;
 
-        if (shopUrl.contains("www.")) {
+        if (isValidWebUrl(shopUrl)) {
             currentUrlSearch = shopUrl + "/shop/sort-by-price-low-to-high?search=" + productName.replace(" ", "%20");
         }
 
@@ -110,7 +110,7 @@ public class GarbarinoScraper extends Shop {
     }
 
     private Document getDocumentHtml(String shopUrl) throws IOException {
-        if (shopUrl.contains("www.")){
+        if (isValidWebUrl(shopUrl)){
             Connection connection = Jsoup.connect(shopUrl);
             connection.header("Content-Type", "text/html; charset=UTF-8");
             return connection.get();
@@ -118,5 +118,9 @@ public class GarbarinoScraper extends Shop {
 
         File input = new File(shopUrl);
         return Jsoup.parse(input, "UTF-8", "");
+    }
+
+    private boolean isValidWebUrl(String url){
+        return url.contains("www.") || url.contains("http");
     }
 }
