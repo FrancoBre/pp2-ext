@@ -22,7 +22,7 @@ import org.jsoup.select.Elements;
 
 public class GarbarinoScraper extends Shop {
 
-    String shopUrl = "src/resources/garbarino-mouse.html";
+    String shopUrl = "src/resources/garbarino-mouse-teclado.html";
     //String shopUrl = "https://www.garbarino.com";
     public GarbarinoScraper() {}
 
