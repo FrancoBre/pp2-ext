@@ -18,38 +18,30 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class RefreshableShop extends Shop {
+public class RShop extends Shop {
 
-    private Long initialPrice = 100L;
-    private final String directoryPath = "plugins/";
+    private final String directoryPath = "src/test/resources/refresh/";
 
-    public RefreshableShop() {
+    public RShop() {
         super();
-        this.name = "refreshable";
+        this.name = "R";
     }
 
     @Override
     public Set<Map<String, BigDecimal>> search(String productName) {
-        if (productName.isEmpty() || productName.equals("e")) {
-            this.notifySearchResult(Collections.emptySet());
-            return Collections.emptySet();
-        }
-
-        Set<Map<String, BigDecimal>> products = addProducts(productName);
-        this.notifySearchResult(products);
-
         try {
             launchAsyncTaskToPollFiles(productName);
         } catch (Exception e) {
             System.out.println("Error while polling files: " + e.getMessage());
         }
-        return products;
+        this.notifySearchResult(Collections.emptySet());
+        return Collections.emptySet();
     }
 
-    private Set<Map<String, BigDecimal>> addProducts(String productName) {
+    private Set<Map<String, BigDecimal>> addProducts() {
         Set<Map<String, BigDecimal>> products = new HashSet<>();
         Map<String, BigDecimal> product = new HashMap<>();
-        product.put(productName, new BigDecimal(initialPrice += 100L));
+        product.put("a", new BigDecimal(100));
         products.add(product);
 
         this.notifySearchResult(products);
@@ -65,7 +57,6 @@ public class RefreshableShop extends Shop {
             }
         };
 
-        // Crea un ExecutorService para ejecutar el hilo de escucha en segundo plano
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(filePollingTask);
     }
@@ -82,11 +73,11 @@ public class RefreshableShop extends Shop {
                     WatchEvent.Kind<?> kind = event.kind();
 
                     if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
-                        this.addProducts(productName);
+                        this.addProducts();
                         Path fileName = (Path) event.context();
                         System.out.println("New file created: " + fileName);
                     } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-                        this.addProducts(productName);
+                        this.addProducts();
                         Path fileName = (Path) event.context();
                         System.out.println("File modified: " + fileName);
                     }
