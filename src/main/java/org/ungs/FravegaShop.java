@@ -83,6 +83,7 @@ public class FravegaShop extends Shop {
             }
         }
 
+        this.notifySearchResult(result);
         return result;
     }
 
