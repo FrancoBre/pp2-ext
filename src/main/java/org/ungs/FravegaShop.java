@@ -20,12 +20,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class FravegaScraper extends Shop {
+public class FravegaShop extends Shop {
 
-    String shopUrl = "https://www.fravega.com";
-    //String shopUrl = "src/resources/fravega-mouse-teclado-webcam.html";
+    //String shopUrl = "https://www.fravega.com";
+    String shopUrl = "src/test/resources/US3/fravega-mouse-teclado-webcam.html";
 
-    public FravegaScraper() {}
+    public FravegaShop() {
+        this.name = "fravega";
+    }
 
     @Override
     public Set<Map<String, BigDecimal>> search(String productName) {
