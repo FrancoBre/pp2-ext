@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 
 public class RShop extends Shop {
 
-    private final String directoryPath = "src/test/resources/refresh/";
+    private final String directoryPath = "src/test/resources/US6/refresh/";
 
     public RShop() {
         super();
