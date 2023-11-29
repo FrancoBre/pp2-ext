@@ -4,15 +4,13 @@ import entities.Shop;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-public class FShop extends Shop {
+public class HShop extends Shop {
 
-    public FShop() {
+    public HShop() {
         super();
-        this.name = "F";
+        this.name = "H";
     }
 
     @Override
@@ -26,7 +24,7 @@ public class FShop extends Shop {
 
     private Map<String, BigDecimal> getProduct(String productName) {
         Map<String, BigDecimal> product = new HashMap<>();
-        product.put(productName, new BigDecimal(100));
+        product.put(productName, new BigDecimal(200));
 
         return product;
     }

@@ -16,23 +16,18 @@ public class GShop extends Shop {
     }
 
     @Override
-    public Set<Map<String, BigDecimal>> search(String productName) {
-        if (productName.isEmpty() || productName.equals("e")) {
-            this.notifySearchResult(Collections.emptySet());
-            return Collections.emptySet();
+    public Map<String, BigDecimal> search(String productName) {
+        if (!productName.contains("a")) {
+            return Collections.emptyMap();
         }
 
-        Set<Map<String, BigDecimal>> products = this.getProducts(productName);
-        this.notifySearchResult(products);
-        return products;
+        return this.getProduct(productName);
     }
 
-    private Set<Map<String, BigDecimal>> getProducts(String productName) {
-        Set<Map<String, BigDecimal>> products = new HashSet<>();
+    private Map<String, BigDecimal> getProduct(String productName) {
         Map<String, BigDecimal> product = new HashMap<>();
         product.put(productName, new BigDecimal(200));
-        products.add(product);
 
-        return products;
+        return product;
     }
 }
