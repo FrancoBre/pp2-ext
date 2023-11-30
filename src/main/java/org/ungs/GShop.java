@@ -4,16 +4,9 @@ import entities.Shop;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-public class GShop extends Shop {
-
-    public GShop() {
-        super();
-        this.name = "G";
-    }
+public class GShop implements Shop {
 
     @Override
     public Map<String, BigDecimal> search(String productName) {
@@ -22,6 +15,11 @@ public class GShop extends Shop {
         }
 
         return this.getProduct(productName);
+    }
+
+    @Override
+    public String getName() {
+        return "G";
     }
 
     private Map<String, BigDecimal> getProduct(String productName) {

@@ -6,12 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class IShop extends Shop {
-
-    public IShop() {
-        super();
-        this.name = "I";
-    }
+public class IShop implements Shop {
 
     @Override
     public Map<String, BigDecimal> search(String productName) {
@@ -20,6 +15,11 @@ public class IShop extends Shop {
         }
 
         return this.getProduct(productName);
+    }
+
+    @Override
+    public String getName() {
+        return "I";
     }
 
     private Map<String, BigDecimal> getProduct(String productName) {
